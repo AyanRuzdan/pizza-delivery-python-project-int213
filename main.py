@@ -1,171 +1,264 @@
 from tkinter import *
+from tkinter import messagebox
+import mysql.connector as mysql
+from datetime import datetime, date
+
+conn = mysql.connect(user="root", password="root")
+c = conn.cursor()
+
+c.execute("CREATE DATABASE IF NOT EXISTS bachelorpizza;")
+c.execute("use bachelorpizza;")
+
+with open("new.txt") as f:
+    c.execute(f.read())
+conn.commit()
+c.close()
+conn.close()
 
 root = Tk()
-root.geometry("400x400")
-root.title("Main Menu")
-var = StringVar()
-head = Label(root, textvariable=var)
-var.set("PIZZA DELIVERY SYSTEM\nARE YOU A:")
-head.pack()
+root.geometry("1270x640+0+0")
+root.title("Giorno's Pizza")
+ordernum = 0
+root.configure(bg='lightblue')
 
 
-# function to show label
-def label(windowName, LabelText, rowVal, colVal):
-    new_label = Label(windowName, text=LabelText)
-    new_label.grid(row=rowVal, column=colVal)
+def timefunc():
+    e = datetime.now()
+    orderid = e_orderid3.get()
+    conn = mysql.connect(host='localhost',
+                         user='root',
+                         password='root',
+                         database='bachelorpizza')
+    cursor = conn.cursor()
+    query = f"select * from orderpizza where orderid = '{orderid}'"
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    currenttime = f"{e.hour}:{e.minute}:{e.second}"
+    curr = datetime.strptime(currenttime, '%H:%M:%S').time()
+    for row in rows:
+        ordtime = row[6]
+    ordertime = datetime.strptime(ordtime, '%H:%M:%S').time()
+    duration = datetime.combine(date.today(), curr) - datetime.combine(
+        date.today(), ordertime)
+    messagebox.showinfo("Order Status",
+                        f"Your order is served in {duration} time.")
+    e_orderid3.delete(0, END)
+    conn.close()
 
 
-# function to bring the customer main menu window
-def customer_window():
-    newWindow = Toplevel(root)
-    newWindow.geometry("400x400")
-    newWindow.title("Customer")
-    order = Button(newWindow,
-                   text="Order Pizza",
-                   width=25,
-                   command=order_window)
-    cancel = Button(newWindow,
-                    text="Cancel Order",
-                    width=25,
-                    command=cancel_window)
-    track_order = Button(newWindow,
-                         text="Track Order",
-                         width=25,
-                         command=track_window)
-    exit_button = Button(newWindow,
-                         text="Exit",
-                         width=25,
-                         command=newWindow.destroy)
-    order.pack()
-    cancel.pack()
-    track_order.pack()
-    exit_button.pack()
+def ordernow():
+    e = datetime.now()
+    name = e_name.get()
+    address = e_address.get()
+    mobile = e_mobile.get()
+    emailid = e_emailid.get()
+    pizzatype = size.get()
+    ordertime = f"{e.hour}:{e.minute}:{e.second}"
+    global ordernum
+    ordernum = ordernum + 1
+    print(ordernum)
+    if (name == "" or address == "" or mobile == "" or emailid == ""
+            or pizzatype == ""):
+        messagebox.showinfo("Order Status", "All the feilds are required")
+    else:
+        conn = mysql.connect(host="localhost",
+                             user="root",
+                             password="root",
+                             database="bachelorpizza")
+        cursor = conn.cursor()
+        query = f"INSERT INTO orderpizza VALUES ('{ordernum}', '{name}', '{address}','{mobile}', '{emailid}', '{pizzatype}','{ordertime}')"
+        cursor.execute(query)
+        cursor.execute("commit")
+        messagebox.showinfo("Order Status",
+                            "Order has been successfully ordered")
+        e_name.delete(0, 'end')
+        e_address.delete(0, 'end')
+        e_mobile.delete(0, 'end')
+        e_emailid.delete(0, 'end')
+        size.set("large")
+        conn.close()
+        list1.delete(0, END)
+        show()
 
 
-# function to bring the vendor main menu window
-def vendor_window():
-    newWindow = Toplevel(root)
-    newWindow.geometry("400x400")
-    newWindow.title("Vendor")
-    new_pizza_order = Button(newWindow,
-                             text="New Pizza Order",
-                             width=25,
-                             command=go_back)
-    cancelled_order = Button(newWindow,
-                             text="Cancelled Order",
-                             width=25,
-                             command=go_back)
-    served_order = Button(newWindow,
-                          text="Served Order",
-                          width=25,
-                          command=go_back)
-    pending_order = Button(newWindow,
-                           text="Pending Order",
-                           width=25,
-                           command=go_back)
-    main_menu = Button(newWindow,
-                       text="Go Back to Main Menu",
-                       width=25,
-                       command=newWindow.destroy)
-    new_pizza_order.pack()
-    cancelled_order.pack()
-    served_order.pack()
-    pending_order.pack()
-    main_menu.pack()
+def show():
+    conn = mysql.connect(host="localhost",
+                         user="root",
+                         password="root",
+                         database="bachelorpizza")
+    cursor = conn.cursor()
+    cursor.execute("select * from orderpizza")
+    rows = cursor.fetchall()
+    for row in rows:
+        insertdata = str(
+            row[0]) + '           ' + row[1] + '           ' + row[6]
+        list1.insert(list1.size() + 1, insertdata)
+    conn.close()
 
 
-# function to bring the pizza selection menu window
-def order_window():
-    orderWindow = Toplevel(root)
-    orderWindow.geometry("400x400")
-    orderWindow.title("Order Pizza")
-    label(orderWindow, "Name", 0, 0)
-    name_entry = Entry(orderWindow)
-    name_entry.grid(row=0, column=1)
-    label(orderWindow, "Address", 1, 0)
-    address_entry = Entry(orderWindow)
-    address_entry.grid(row=1, column=1)
-    label(orderWindow, "Pizza Type", 2, 0)
-    type1 = IntVar()
-    type2 = IntVar()
-    type3 = IntVar()
-    Checkbutton(orderWindow, text="Type 1", variable=type1).grid(row=2,
-                                                                 column=1)
-    Checkbutton(orderWindow, text="Type 2", variable=type2).grid(row=2,
-                                                                 column=2)
-    Checkbutton(orderWindow, text="Type 3", variable=type3).grid(row=2,
-                                                                 column=3)
-    label(orderWindow, "Mobile No.", 3, 0)
-    mobile_num_entry = Entry(orderWindow)
-    mobile_num_entry.grid(row=3, column=1)
-    label(orderWindow, "E-Mail", 4, 0)
-    email_entry = Entry(orderWindow)
-    email_entry.grid(row=4, column=1)
-    go_back = Button(orderWindow, text="Go Back",
-                     command=orderWindow.destroy).grid(row=5, column=0)
-    order = Button(orderWindow, text="Order Now",
-                   command=ordered_window_final).grid(row=5, column=1)
-    go_back.pack()
-    order.pack()
+dict1 = {}
 
 
-# function to show that the pizza is ordered
-def ordered_window_final():
-    new = Toplevel(root)
-    new.geometry("400x400")
-    new.title("Ordered")
-    Label(new, text="Ordered").pack(padx=20, pady=20)
+def cancelorders():
+    conn = mysql.connect(host="localhost",
+                         user="root",
+                         password="root",
+                         database="bachelorpizza")
+    cursor = conn.cursor()
+    for i in dict1:
+        insertdata1 = str(i) + '           ' + dict1[i]
+        list2.insert(list2.size() + 1, insertdata1)
+    conn.close()
 
 
-# function to show the pizza order cancellation window
-def cancel_window():
-    cancelWindow = Toplevel(root)
-    cancelWindow.geometry("400x400")
-    cancelWindow.title("Cancel Order")
-    label(cancelWindow, "Name", 0, 0)
-    name_entry = Entry(cancelWindow)
-    name_entry.grid(row=0, column=1)
-    label(cancelWindow, "Order ID", 1, 0)
-    order_id_entry = Entry(cancelWindow)
-    order_id_entry.grid(row=1, column=1)
-    Button(cancelWindow, text="Go Back",
-           command=cancelWindow.destroy).grid(row=2, column=0)
-    Button(cancelWindow, text="Cancel Order").grid(row=2, column=1)
+def cancelbtn():
+    orderid = e_orderid2.get()
+    name = e_name2.get()
+    global dict1
+    dict1[orderid] = name
+    conn = mysql.connect(host="localhost",
+                         user="root",
+                         password="root",
+                         database="bachelorpizza")
+    cursor = conn.cursor()
+    query = f"Delete from orderpizza where name='{name}' and orderid = '{orderid}'"
+    cursor.execute(query)
+    cursor.execute("commit")
+    messagebox.showinfo("Cancel Status",
+                        "Order has been successfully cancelled")
+    e_name2.delete(0, 'end')
+    e_orderid2.delete(0, 'end')
+    list1.delete(0, END)
+    show()
+    cancelorders()
+    conn.close()
 
 
-# function to show the order tracking window
-def track_window():
-    trackWindow = Toplevel(root)
-    trackWindow.geometry("400x400")
-    trackWindow.title("Track Order")
-    label(trackWindow, "Order ID", 0, 0)
-    track_id_entry = Entry(trackWindow)
-    track_id_entry.grid(row=0, column=1)
-    Button(trackWindow, text="Go Back",
-           command=trackWindow.destroy).grid(row=1, column=0)
-    Button(trackWindow, text="Track Order").grid(row=1, column=1)
+Label(root, text="BachelorPizza", font="arial 20 bold").pack(side=TOP, pady=20)
 
+orderframe = Frame(root, width=500, height=500, bg="white")
 
-def go_back():
-    go_back = Toplevel(root)
-    go_back.geometry("400x400")
-    go_back.title("Under Construction")
-    Label(go_back, text="Under Construction", font=20).grid(row=0, column=0)
-    Button(go_back, text="Go Back", command=go_back.destroy).grid(row=1,column=0)
+Label(orderframe, text="Order Pizza", font="arial 20 bold").place(x=200, y=10)
+name = Label(orderframe, text="Name", font="arial 15", bg="white")
+name.place(x=20, y=70)
+e_name = Entry(orderframe, font="arial 15")
+e_name.place(x=180, y=70)
 
+address = Label(orderframe, text="Address", font="arial 15", bg="white")
+address.place(x=20, y=110)
+e_address = Entry(orderframe, font="arial 15")
+e_address.place(x=180, y=110)
 
-customer_window_button = Button(root,
-                                text="Customer",
-                                width=25,
-                                command=customer_window)
-vendor_window_button = Button(root,
-                              text="Vendor",
-                              width=25,
-                              command=vendor_window)
-exit_button = Button(root, text="Quit", command=root.destroy, width=25)
+mobile = Label(orderframe, text="Mobile No", font="arial 15", bg="white")
+mobile.place(x=20, y=150)
+e_mobile = Entry(orderframe, font="arial 15")
+e_mobile.place(x=180, y=150)
 
-customer_window_button.pack()
-vendor_window_button.pack()
-exit_button.pack()
+emailid = Label(orderframe, text="Email Id", font="arial 15", bg="white")
+emailid.place(x=20, y=190)
+e_emailid = Entry(orderframe, font="arial 15")
+e_emailid.place(x=180, y=190)
+
+pizzatype = Label(orderframe,
+                  text="Pizaa Type",
+                  font="arial 15",
+                  bg="white")
+pizzatype.place(x=20, y=230)
+
+size = StringVar()
+small = Radiobutton(orderframe,
+                    variable=size,
+                    value="small",
+                    text="Small(95 Rs)").place(x=180, y=230)
+medium = Radiobutton(orderframe,
+                     variable=size,
+                     value="medium",
+                     text="Medium(195 Rs)").place(x=180, y=270)
+large = Radiobutton(orderframe,
+                    variable=size,
+                    value="large",
+                    text="Large(295 Rs)").place(x=180, y=310)
+size.set("large")
+
+orderbtn = Button(orderframe,
+                  text="Order Now",
+                  font="arial 15",
+                  command=ordernow)
+orderbtn.place(x=200, y=360)
+orderframe.pack()
+
+showframe = Frame(root, width=360, height=300, bg='white')
+Label(showframe, text="Show Orders", font='arial 20 bold',
+      fg='black').place(x=90, y=5)
+list1 = Listbox(showframe, width=37, height=200, font='arial 12')
+list1.place(x=10, y=50)
+show()
+showframe.place(x=10, y=37)
+
+cancelorder = Frame(root, width=360, height=300, bg='white')
+Label(cancelorder, text="Cancel Order", font='arial 20 bold',
+      bg='white').place(x=90, y=5)
+
+cancelfr = Frame(cancelorder, width=340, height=200, bg='white')
+
+name2 = Label(cancelorder, text="Order Id", font="arial 13")
+name2.place(x=20, y=70)
+e_orderid2 = Entry(cancelorder,
+                   font="arial 13",
+                   bd=1,
+                   highlightbackground='black',
+                   highlightthickness=1,
+                   width=16)
+e_orderid2.place(x=180, y=70)
+
+address2 = Label(cancelorder, text="Name", font="arial 13")
+address2.place(x=20, y=100)
+e_name2 = Entry(cancelorder,
+                font="arial 13",
+                bd=1,
+                highlightbackground='black',
+                highlightthickness=1,
+                width=16)
+e_name2.place(x=180, y=100)
+orderbtn = Button(cancelfr,
+                  text="Cancel Order",
+                  font="arial 13",
+                  command=cancelbtn)
+orderbtn.place(x=130, y=100)
+cancelfr.place(x=10, y=52)
+
+cancelorder.place(x=900, y=37)
+
+showcancel = Frame(root, width=360, height=300, bg='white')
+Label(showcancel, text="Cancelled Orders", font='arial 20 bold',
+      fg='black').place(x=65, y=5)
+list2 = Listbox(showcancel, width=30, font='arial 15')
+list2.place(x=10, y=50)
+cancelorders()
+showcancel.place(x=10, y=300)
+
+cancelorder = Frame(root, width=360, height=300, bg='white')
+
+Label(cancelorder, text="Track Order", font='arial 20 bold',
+      bg='white').place(x=90, y=5)
+cancelfr = Frame(cancelorder, width=340, height=230, bg='white')
+name2 = Label(cancelorder, text="Order Id", font="arial 15")
+name2.place(x=20, y=90)
+e_orderid3 = Entry(cancelorder,
+                   font="arial 15",
+                   bd=1,
+                   highlightbackground='black',
+                   highlightthickness=1,
+                   width=13)
+e_orderid3.place(x=180, y=90)
+
+orderbtn = Button(cancelfr,
+                  text="Track Now",
+                  font="arial 15",
+                  command=timefunc)
+orderbtn.place(x=130, y=120)
+cancelfr.place(x=10, y=52)
+
+cancelorder.place(x=900, y=300)
 
 root.mainloop()
