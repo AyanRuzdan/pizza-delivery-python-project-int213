@@ -19,7 +19,7 @@ root = Tk()
 root.geometry("1270x640+0+0")
 root.title("Giorno's Pizza")
 ordernum = 0
-root.configure(bg='lightblue')
+root.configure(bg='lightyellow')
 
 
 def timefunc():
@@ -134,7 +134,7 @@ def cancelbtn():
     conn.close()
 
 
-Label(root, text="BachelorPizza", font="arial 20 bold").pack(side=TOP, pady=20)
+Label(root, text="Giorno's Pizza", font="arial 20 bold").pack(side=TOP, pady=20)
 
 orderframe = Frame(root, width=500, height=500, bg="white")
 
@@ -160,7 +160,7 @@ e_emailid = Entry(orderframe, font="arial 15")
 e_emailid.place(x=180, y=190)
 
 pizzatype = Label(orderframe,
-                  text="Pizaa Type",
+                  text="Pizza Type",
                   font="arial 15",
                   bg="white")
 pizzatype.place(x=20, y=230)
