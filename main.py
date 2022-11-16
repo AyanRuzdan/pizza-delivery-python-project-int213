@@ -6,8 +6,8 @@ from datetime import datetime, date
 conn = mysql.connect(user="root", password="root")
 c = conn.cursor()
 
-c.execute("CREATE DATABASE IF NOT EXISTS bachelorpizza;")
-c.execute("use bachelorpizza;")
+c.execute("CREATE DATABASE IF NOT EXISTS jojopizza;")
+c.execute("use jojopizza;")
 
 with open("new.txt") as f:
     c.execute(f.read())
@@ -28,7 +28,7 @@ def timefunc():
     conn = mysql.connect(host='localhost',
                          user='root',
                          password='root',
-                         database='bachelorpizza')
+                         database='jojopizza')
     cursor = conn.cursor()
     query = f"select * from orderpizza where orderid = '{orderid}'"
     cursor.execute(query)
@@ -64,7 +64,7 @@ def ordernow():
         conn = mysql.connect(host="localhost",
                              user="root",
                              password="root",
-                             database="bachelorpizza")
+                             database="jojopizza")
         cursor = conn.cursor()
         query = f"INSERT INTO orderpizza VALUES ('{ordernum}', '{name}', '{address}','{mobile}', '{emailid}', '{pizzatype}','{ordertime}')"
         cursor.execute(query)
@@ -85,7 +85,7 @@ def show():
     conn = mysql.connect(host="localhost",
                          user="root",
                          password="root",
-                         database="bachelorpizza")
+                         database="jojopizza")
     cursor = conn.cursor()
     cursor.execute("select * from orderpizza")
     rows = cursor.fetchall()
@@ -103,7 +103,7 @@ def cancelorders():
     conn = mysql.connect(host="localhost",
                          user="root",
                          password="root",
-                         database="bachelorpizza")
+                         database="jojopizza")
     cursor = conn.cursor()
     for i in dict1:
         insertdata1 = str(i) + '           ' + dict1[i]
@@ -119,7 +119,7 @@ def cancelbtn():
     conn = mysql.connect(host="localhost",
                          user="root",
                          password="root",
-                         database="bachelorpizza")
+                         database="jojopizza")
     cursor = conn.cursor()
     query = f"Delete from orderpizza where name='{name}' and orderid = '{orderid}'"
     cursor.execute(query)
